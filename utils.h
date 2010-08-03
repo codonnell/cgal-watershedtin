@@ -24,7 +24,7 @@ struct Plane_equation {
  * of the adjacent face to determine whether the face is sloping into or away
  * from the halfedge.
  */
-bool slopes_into(const Halfedge& h);
+bool slopes_into(const Halfedge_const_handle& h);
 
 /**
  * Determines whether a plane is flat.
@@ -39,22 +39,22 @@ void label_all_edges(Polyhedron& p);
 /**
  * Calculates the edge type of a halfedge that has not already been typed.
  */
-enum EdgeType edge_type(const Halfedge& h);
+enum EdgeType edge_type(const Halfedge_const_handle& h);
 
 /**
  * Determines whether h is a ridge.
  */
-bool is_ridge(const Halfedge& h);
+bool is_ridge(const Halfedge_const_handle& h);
 
 /**
  * Determines whether h is a channel.
  */
-bool is_channel(const Halfedge& h);
+bool is_channel(const Halfedge_const_handle& h);
 
 /**
  * Determines whether h is transverse.
  */
-bool is_transverse(const Halfedge& h);
+bool is_transverse(const Halfedge_const_handle& h);
 
 /**
  * Determines whether v is not a saddle.
@@ -67,7 +67,7 @@ bool is_not_saddle(const Vertex& v);
  * A point is a saddle if it has a border halfedge coming from it or more than
  * one channel or ridge.
  */
-bool is_saddle(const Vertex& v);
+bool is_saddle(const Vertex_const_handle& v);
 
 /**
  * Determines whether there is a generalized ridge up the face left of h.
@@ -77,7 +77,7 @@ bool is_saddle(const Vertex& v);
  * edges adjacent to the point through which it runs. No generalized ridges run
  * through the infinity face.
  */
-bool is_generalized_ridge(const Halfedge& h);
+bool is_generalized_ridge(const Halfedge_const_handle& h);
 
 /**
  * Determines whether there is a generalized channel up the face left of h.
@@ -87,6 +87,11 @@ bool is_generalized_ridge(const Halfedge& h);
  * edges adjacent to the point through which it runs. No generalized channels run
  * through the infinity face.
  */
-bool is_generalized_channel(const Halfedge& h);
+bool is_generalized_channel(const Halfedge_const_handle& h);
+
+/**
+ * Prints all points adjacent to the input vertex.
+ */
+void print_neighborhood(const Vertex& v);
 
 #endif

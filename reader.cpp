@@ -16,10 +16,14 @@
 #include <CGAL/IO/Geomview_stream.h>
 #include <CGAL/IO/Polyhedron_geomview_ostream.h>
 
+#include <cassert>
+
 #include "definitions.h"
 #include "utils.h"
 
 static bool DRAWING = false;
+
+bool DEBUG = false;
 
 using std::cout;
 using std::endl;
@@ -55,6 +59,20 @@ int main(int argc, char** argv)
     t.stop();
     cout << "Saddle finding time: " << t.time() << endl;
     t.reset();
+    cout << saddles.size() << " saddles." << endl;
+    for (Vertex_const_iterator it = P.vertices_begin(); it != P.vertices_end(); ++it) {
+        if (it->point() == Point_3(165, 183, 755)) {
+            print_neighborhood(*it);
+        }
+    }
+    char ofname[100] = "";
+    snprintf(ofname, 100, "%s.out", argv[1]);
+    std::ofstream ofile(ofname);
+    assert(ofile);
+    for (std::vector<Vertex>::iterator it = saddles.begin(); it != saddles.end(); ++it) {
+        ofile << it->point() << endl;
+    }
+    ofile.close();
 
     if (DRAWING) {
         Kernel::Iso_cuboid_3 c =

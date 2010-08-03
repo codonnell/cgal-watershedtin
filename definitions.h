@@ -55,13 +55,24 @@ typedef CGAL::Exact_predicates_exact_constructions_kernel Kernel;
 typedef CGAL::Polyhedron_3<Kernel, Tin_Polyhedron_items_3> Polyhedron;
 
 typedef Polyhedron::Halfedge_iterator Halfedge_iterator;
-typedef Polyhedron::Edge_iterator Edge_iterator;
+typedef Polyhedron::Halfedge_const_iterator Halfedge_const_iterator;
+typedef Polyhedron::Vertex_iterator Vertex_iterator;
+typedef Polyhedron::Vertex_const_iterator Vertex_const_iterator;
+typedef Polyhedron::Facet_iterator Facet_iterator;
+typedef Polyhedron::Facet_const_iterator Facet_const_iterator;
 typedef Polyhedron::Point_iterator Point_iterator;
 typedef Polyhedron::Plane_iterator Plane_iterator;
 
 typedef Polyhedron::Halfedge Halfedge;
 typedef Polyhedron::Vertex Vertex;
 typedef Polyhedron::Facet Facet;
+
+typedef Polyhedron::Halfedge_handle Halfedge_handle;
+typedef Polyhedron::Halfedge_const_handle Halfedge_const_handle;
+typedef Polyhedron::Vertex_handle Vertex_handle;
+typedef Polyhedron::Vertex_const_handle Vertex_const_handle;
+typedef Polyhedron::Facet_handle Facet_handle;
+typedef Polyhedron::Facet_const_handle Facet_const_handle;
 
 typedef Polyhedron::Plane_3 Plane_3;
 typedef Polyhedron::Point_3 Point_3;
