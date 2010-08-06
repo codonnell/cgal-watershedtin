@@ -41,6 +41,7 @@ int main(int argc, char** argv)
     CGAL::Timer t;
     t.start();
     input >> P;
+    // Adds plane equations to all the facets.
     std::transform(P.facets_begin(), P.facets_end(), P.planes_begin(), Plane_equation());
     t.stop();
     cout << "Input time: " << t.time() << endl;

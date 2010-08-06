@@ -94,4 +94,9 @@ bool is_generalized_channel(const Halfedge_const_handle& h);
  */
 void print_neighborhood(const Vertex& v);
 
+/**
+ * Prints the two points of a halfedge.
+ */
+void print_halfedge(const Halfedge_const_handle& h);
+
 #endif

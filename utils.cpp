@@ -3,7 +3,7 @@
 #include "definitions.h"
 #include "utils.h"
 
-extern DEBUG;
+extern bool DEBUG;
 
 using std::cout;
 using std::endl;
@@ -82,7 +82,12 @@ bool is_ridge(const Halfedge_const_handle& h)
 {
     if (h->type != NO_TYPE)
         return h->type == RIDGE;
-    return !(slopes_into(h) || slopes_into(h->opposite()));
+    bool ret_val = !(slopes_into(h) || slopes_into(h->opposite()));
+    if (DEBUG) {
+        cout << (ret_val ? "" : "Not ") << "Ridge:" << endl;
+        print_halfedge(h);
+    }
+    return ret_val;
 }
 
 /**
@@ -92,7 +97,12 @@ bool is_channel(const Halfedge_const_handle& h)
 {
     if (h->type != NO_TYPE)
         return h->type == CHANNEL;
-    return slopes_into(h) && slopes_into(h->opposite());
+    bool ret_val = slopes_into(h) && slopes_into(h->opposite());
+    if (DEBUG) {
+        cout << (ret_val ? "" : "Not ") << "Channel:" << endl;
+        print_halfedge(h);
+    }
+    return ret_val;
 }
 
 /**
@@ -102,8 +112,13 @@ bool is_transverse(const Halfedge_const_handle& h)
 {
     if (h->type != NO_TYPE)
         return h->type == TRANSVERSE;
-    return ((slopes_into(h) && !slopes_into(h->opposite())) || 
+    bool ret_val = ((slopes_into(h) && !slopes_into(h->opposite())) ||
             (!slopes_into(h) && slopes_into(h->opposite())));
+    if (DEBUG) {
+        cout << (ret_val ? "" : "Not ") << "Transverse:" << endl;
+        print_halfedge(h);
+    }
+    return ret_val;
 }
 
 /**
@@ -122,6 +137,7 @@ bool is_not_saddle(const Vertex& v)
  */
 bool is_saddle(const Vertex_const_handle& v)
 {
+    DEBUG = true;
     if (DEBUG)
         print_neighborhood(*v);
     typedef Vertex::Halfedge_around_vertex_const_circulator Circulator;
@@ -136,34 +152,42 @@ bool is_saddle(const Vertex_const_handle& v)
             }
             return true;
         }
+        if (DEBUG)
+            cout << "Normal: " << start->facet()->plane().orthogonal_vector() << endl;
         if (is_ridge(start)) {
             if (DEBUG) {
-                cout << "Ridge edge:" << endl;
+                cout << "Ridge:" << endl;
                 print_halfedge(start);
             }
             ++count[0];
+        }
         else if (is_channel(start)) {
             if (DEBUG) {
-                cout << "Channel edge:" << endl;
+                cout << "Channel:" << endl;
                 print_halfedge(start);
             }
             ++count[1];
         }
         if (is_generalized_ridge(start)) {
             if (DEBUG) {
-                cout << " edge:" << endl;
+                cout << "Generalized Ridge:" << endl;
                 print_halfedge(start);
+                Circulator temp = start;
+                print_halfedge(++temp);
             }
             ++count[0];
         }
         else if (is_generalized_channel(start)) {
             if (DEBUG) {
-                cout << "Border edge:" << endl;
+                cout << "Generalized Channel:" << endl;
                 print_halfedge(start);
+                Circulator temp = start;
+                print_halfedge(++temp);
             }
             ++count[1];
         }
     } while (++start != end);
+    DEBUG = false;
     assert(count[0] == count[1]);
     return (count[0] > 1 || count[1] > 1);
 }
@@ -215,3 +239,12 @@ void print_neighborhood(const Vertex& v)
     cout << endl;
 }
 
+
+/**
+ * Prints the two points of a halfedge.
+ */
+void print_halfedge(const Halfedge_const_handle& h)
+{
+    cout << h->vertex()->point() << endl;
+    cout << h->next()->vertex()->point() << endl;
+}
