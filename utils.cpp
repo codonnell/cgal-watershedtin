@@ -20,9 +20,8 @@ bool slopes_into(const Halfedge_const_handle& h)
     if (h->is_border())
         return false;
     Vector_3 normal;
-    if (is_flat_plane(h->facet()->plane())) {
+    if (is_flat_plane(h->facet()->plane()))
         normal = Vector_3(-1.0, 0.0, 0.0);
-    }
     else
         normal = h->facet()->plane().orthogonal_vector();
     // Origin of h
@@ -80,9 +79,11 @@ enum EdgeType edge_type(const Halfedge_const_handle& h)
  */
 bool is_ridge(const Halfedge_const_handle& h)
 {
+    bool ret_val;
     if (h->type != NO_TYPE)
-        return h->type == RIDGE;
-    bool ret_val = !(slopes_into(h) || slopes_into(h->opposite()));
+        ret_val = (h->type == RIDGE);
+    else
+        ret_val = !(slopes_into(h) || slopes_into(h->opposite()));
     if (DEBUG) {
         cout << (ret_val ? "" : "Not ") << "Ridge:" << endl;
         print_halfedge(h);
@@ -95,9 +96,11 @@ bool is_ridge(const Halfedge_const_handle& h)
  */
 bool is_channel(const Halfedge_const_handle& h)
 {
+    bool ret_val;
     if (h->type != NO_TYPE)
-        return h->type == CHANNEL;
-    bool ret_val = slopes_into(h) && slopes_into(h->opposite());
+        ret_val = (h->type == CHANNEL);
+    else
+        ret_val = slopes_into(h) && slopes_into(h->opposite());
     if (DEBUG) {
         cout << (ret_val ? "" : "Not ") << "Channel:" << endl;
         print_halfedge(h);
@@ -110,9 +113,11 @@ bool is_channel(const Halfedge_const_handle& h)
  */
 bool is_transverse(const Halfedge_const_handle& h)
 {
+    bool ret_val;
     if (h->type != NO_TYPE)
-        return h->type == TRANSVERSE;
-    bool ret_val = ((slopes_into(h) && !slopes_into(h->opposite())) ||
+        ret_val = (h->type == TRANSVERSE);
+    else
+        ret_val = ((slopes_into(h) && !slopes_into(h->opposite())) ||
             (!slopes_into(h) && slopes_into(h->opposite())));
     if (DEBUG) {
         cout << (ret_val ? "" : "Not ") << "Transverse:" << endl;
