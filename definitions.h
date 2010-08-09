@@ -12,6 +12,8 @@
 
 enum EdgeType {
     NO_TYPE, // Type not yet calculated.
+    IN, // Water flows into this halfedge
+    OUT, // Water flows out from this halfedge
     RIDGE, // Water flows away on both sides.
     CHANNEL, // Water flows in on both sides.
     TRANSVERSE, // Water flows in on one side, away on the other.

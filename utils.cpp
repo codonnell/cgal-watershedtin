@@ -3,7 +3,7 @@
 #include "definitions.h"
 #include "utils.h"
 
-extern bool DEBUG;
+static bool DEBUG_UTIL;
 
 using std::cout;
 using std::endl;
@@ -17,6 +17,11 @@ using std::endl;
  */
 bool slopes_into(const Halfedge_const_handle& h)
 {
+    if (h->type == IN)
+        return true;
+    else if (h->type == OUT)
+        return false;
+
     if (h->is_border())
         return false;
     Vector_3 normal;
@@ -25,19 +30,24 @@ bool slopes_into(const Halfedge_const_handle& h)
     else
         normal = h->facet()->plane().orthogonal_vector();
     // Origin of h
-    const Point_3 origin_3 = h->vertex()->point();
+    const Point_3 origin_3 = h->opposite()->vertex()->point();
     const Point_2 origin_2 = Point_2(origin_3.x(), origin_3.y());
     // Dest of h
-    const Point_3 dest_3 = h->next()->vertex()->point();
+    const Point_3 dest_3 = h->vertex()->point();
     const Point_2 dest_2 = Point_2(dest_3.x(), dest_3.y());
     // Displacement by flow direction of h
     const Point_3 disp_point_3 = origin_3 + normal;
     const Point_2 disp_point_2 = Point_2(disp_point_3.x(), disp_point_3.y());
+    
+    if (DEBUG_UTIL) {
+        cout << "Normal: " << normal << endl;
+        cout << "Origin: " << origin_3 << endl;
+        cout << "Dest: " << dest_3 << endl;
+        cout << "Disp: " << disp_point_3 << endl;
+    }
 
     CGAL::Orientation o = orientation(origin_2, dest_2, disp_point_2);
-    if (o == CGAL::RIGHT_TURN)
-        return false;
-    return true; // o == LEFT_TURN or COLLINEAR
+    return (o == CGAL::RIGHT_TURN);
 }
 
 /**
@@ -66,12 +76,15 @@ void label_all_edges(Polyhedron& p)
 enum EdgeType edge_type(const Halfedge_const_handle& h)
 {
     assert(h->type == NO_TYPE);
-    if (is_ridge(h))
-        return RIDGE;
-    else if (is_channel(h))
-        return CHANNEL;
-    assert(is_transverse(h));
-    return TRANSVERSE;
+    if (slopes_into(h))
+        return IN;
+    return OUT;
+    // if (is_ridge(h))
+    //     return RIDGE;
+    // else if (is_channel(h))
+    //     return CHANNEL;
+    // assert(is_transverse(h));
+    // return TRANSVERSE;
 }
 
 /**
@@ -80,11 +93,11 @@ enum EdgeType edge_type(const Halfedge_const_handle& h)
 bool is_ridge(const Halfedge_const_handle& h)
 {
     bool ret_val;
-    if (h->type != NO_TYPE)
-        ret_val = (h->type == RIDGE);
-    else
-        ret_val = !(slopes_into(h) || slopes_into(h->opposite()));
-    if (DEBUG) {
+    // if (h->type != NO_TYPE)
+    //     ret_val = (h->type == RIDGE);
+    // else
+    ret_val = !(slopes_into(h) || slopes_into(h->opposite()));
+    if (DEBUG_UTIL) {
         cout << (ret_val ? "" : "Not ") << "Ridge:" << endl;
         print_halfedge(h);
     }
@@ -97,11 +110,11 @@ bool is_ridge(const Halfedge_const_handle& h)
 bool is_channel(const Halfedge_const_handle& h)
 {
     bool ret_val;
-    if (h->type != NO_TYPE)
-        ret_val = (h->type == CHANNEL);
-    else
-        ret_val = slopes_into(h) && slopes_into(h->opposite());
-    if (DEBUG) {
+    // if (h->type != NO_TYPE)
+    //     ret_val = (h->type == CHANNEL);
+    // else
+    ret_val = slopes_into(h) && slopes_into(h->opposite());
+    if (DEBUG_UTIL) {
         cout << (ret_val ? "" : "Not ") << "Channel:" << endl;
         print_halfedge(h);
     }
@@ -114,12 +127,12 @@ bool is_channel(const Halfedge_const_handle& h)
 bool is_transverse(const Halfedge_const_handle& h)
 {
     bool ret_val;
-    if (h->type != NO_TYPE)
-        ret_val = (h->type == TRANSVERSE);
-    else
-        ret_val = ((slopes_into(h) && !slopes_into(h->opposite())) ||
+    // if (h->type != NO_TYPE)
+    //     ret_val = (h->type == TRANSVERSE);
+    // else
+    ret_val = ((slopes_into(h) && !slopes_into(h->opposite())) ||
             (!slopes_into(h) && slopes_into(h->opposite())));
-    if (DEBUG) {
+    if (DEBUG_UTIL) {
         cout << (ret_val ? "" : "Not ") << "Transverse:" << endl;
         print_halfedge(h);
     }
@@ -142,8 +155,7 @@ bool is_not_saddle(const Vertex& v)
  */
 bool is_saddle(const Vertex_const_handle& v)
 {
-    DEBUG = true;
-    if (DEBUG)
+    if (DEBUG_UTIL)
         print_neighborhood(*v);
     typedef Vertex::Halfedge_around_vertex_const_circulator Circulator;
     Circulator start = v->vertex_begin();
@@ -151,30 +163,31 @@ bool is_saddle(const Vertex_const_handle& v)
     int count[2] = {0, 0}; // Tracks the number of ridges and channels
     do {
         if (start->is_border()) {
-            if (DEBUG) {
+            if (DEBUG_UTIL) {
                 cout << "Border edge:" << endl;
                 print_halfedge(start);
             }
             return true;
         }
-        if (DEBUG)
-            cout << "Normal: " << start->facet()->plane().orthogonal_vector() << endl;
+        if (DEBUG_UTIL)
+            cout << "Normal: " << start->facet()->plane().orthogonal_vector() <<
+                endl;
         if (is_ridge(start)) {
-            if (DEBUG) {
+            if (DEBUG_UTIL) {
                 cout << "Ridge:" << endl;
                 print_halfedge(start);
             }
             ++count[0];
         }
         else if (is_channel(start)) {
-            if (DEBUG) {
+            if (DEBUG_UTIL) {
                 cout << "Channel:" << endl;
                 print_halfedge(start);
             }
             ++count[1];
         }
         if (is_generalized_ridge(start)) {
-            if (DEBUG) {
+            if (DEBUG_UTIL) {
                 cout << "Generalized Ridge:" << endl;
                 print_halfedge(start);
                 Circulator temp = start;
@@ -183,7 +196,7 @@ bool is_saddle(const Vertex_const_handle& v)
             ++count[0];
         }
         else if (is_generalized_channel(start)) {
-            if (DEBUG) {
+            if (DEBUG_UTIL) {
                 cout << "Generalized Channel:" << endl;
                 print_halfedge(start);
                 Circulator temp = start;
@@ -192,13 +205,12 @@ bool is_saddle(const Vertex_const_handle& v)
             ++count[1];
         }
     } while (++start != end);
-    DEBUG = false;
     assert(count[0] == count[1]);
     return (count[0] > 1 || count[1] > 1);
 }
 
 /**
- * Determines whether there is a generalized ridge up the face right of h.
+ * Is there a generalized ridge up the face left of h starting at h's vertex?
  *
  * A generalized ridge is an upslope line through which water does not flow. A
  * generalized ridge can be found by determining whether water flows into both
@@ -207,14 +219,13 @@ bool is_saddle(const Vertex_const_handle& v)
  */
 bool is_generalized_ridge(const Halfedge_const_handle& h)
 {
-    const Halfedge_const_handle e = h->opposite();
-    if (e->is_border() && e->next()->is_border())
+    if (h->is_border() && h->next()->is_border())
         return false;
-    return slopes_into(e) && slopes_into(e->next());
+    return slopes_into(h) && slopes_into(h->next());
 }
 
 /**
- * Determines whether there is a generalized channel up the face right of h.
+ * Is there a generalized channel up the face left of h starting at h's vertex?
  *
  * A generalized channel is a downslope line through which water does not flow. A
  * generalized channel can be found by determining whether water flows into both
@@ -223,10 +234,9 @@ bool is_generalized_ridge(const Halfedge_const_handle& h)
  */
 bool is_generalized_channel(const Halfedge_const_handle& h)
 {
-    const Halfedge_const_handle e = h->opposite();
-    if (e->is_border() && e->next()->is_border())
+    if (h->is_border() && h->next()->is_border())
         return false;
-    return !(slopes_into(e) || slopes_into(e->next()));
+    return !(slopes_into(h) || slopes_into(h->next()));
 }
 
 /**
@@ -239,7 +249,7 @@ void print_neighborhood(const Vertex& v)
     Circulator start = v.vertex_begin();
     Circulator end = v.vertex_begin();
     do {
-        cout << start->next()->vertex()->point() << endl;
+        cout << start->opposite()->vertex()->point() << endl;
     } while (++start != end);
     cout << endl;
 }
@@ -250,6 +260,6 @@ void print_neighborhood(const Vertex& v)
  */
 void print_halfedge(const Halfedge_const_handle& h)
 {
+    cout << h->opposite()->vertex()->point() << endl;
     cout << h->vertex()->point() << endl;
-    cout << h->next()->vertex()->point() << endl;
 }

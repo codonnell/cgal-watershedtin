@@ -22,8 +22,7 @@
 #include "utils.h"
 
 static bool DRAWING = false;
-
-bool DEBUG = false;
+static bool DEBUG_READER = false;
 
 using std::cout;
 using std::endl;
@@ -42,7 +41,8 @@ int main(int argc, char** argv)
     t.start();
     input >> P;
     // Adds plane equations to all the facets.
-    std::transform(P.facets_begin(), P.facets_end(), P.planes_begin(), Plane_equation());
+    std::transform(P.facets_begin(), P.facets_end(), P.planes_begin(),
+            Plane_equation());
     t.stop();
     cout << "Input time: " << t.time() << endl;
     t.reset();
@@ -60,17 +60,14 @@ int main(int argc, char** argv)
     t.stop();
     cout << "Saddle finding time: " << t.time() << endl;
     t.reset();
-    cout << saddles.size() << " saddles." << endl;
-    for (Vertex_const_iterator it = P.vertices_begin(); it != P.vertices_end(); ++it) {
-        if (it->point() == Point_3(165, 183, 755)) {
-            print_neighborhood(*it);
-        }
-    }
+    cout << "There are " << saddles.size() << " saddles." << endl;
+
     char ofname[100] = "";
     snprintf(ofname, 100, "%s.out", argv[1]);
     std::ofstream ofile(ofname);
     assert(ofile);
-    for (std::vector<Vertex>::iterator it = saddles.begin(); it != saddles.end(); ++it) {
+    for (std::vector<Vertex>::iterator it = saddles.begin(); it !=
+            saddles.end(); ++it) {
         ofile << it->point() << endl;
     }
     ofile.close();
@@ -89,3 +86,4 @@ int main(int argc, char** argv)
 
     return 0;
 }
+
