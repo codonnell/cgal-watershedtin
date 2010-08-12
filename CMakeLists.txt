@@ -21,7 +21,7 @@ if ( CGAL_FOUND )
 
     include( ${CGAL_USE_FILE} )
 
-    add_executable( reader primitives.cpp utils.cpp reader.cpp )
+    add_executable( reader watershed.cpp primitives.cpp utils.cpp reader.cpp )
     add_to_cached_list( CGAL_EXECUTABLE_TARGETS reader)
 
     # Link the executable to CGAL and third-party libraries

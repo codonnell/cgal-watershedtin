@@ -10,18 +10,6 @@ using std::cout;
 using std::endl;
 
 /**
- * Set the label on all edges to be CHANNEL, RIDGE, or TRANSVERSE.
- */
-void label_all_edges(Polyhedron& p)
-{
-    for (Halfedge_iterator i = p.halfedges_begin(); i != p.halfedges_end(); ++i) {
-        // type is not initialized by the constructor, so we initialize it here.
-        i->type = NO_TYPE;
-        i->type = edge_type(i);
-    }
-}
-
-/**
  * Calculates the edge type of a halfedge that has not already been typed.
  */
 enum EdgeType edge_type(const Halfedge_const_handle& h)
@@ -51,54 +39,94 @@ bool is_saddle(const Vertex_const_handle& v)
     if (DEBUG_UTIL)
         print_neighborhood(*v);
     typedef Vertex::Halfedge_around_vertex_const_circulator Circulator;
-    Circulator start = v->vertex_begin();
+    Circulator current = v->vertex_begin();
     Circulator end = v->vertex_begin();
     int count[2] = {0, 0}; // Tracks the number of ridges and channels
     do {
-        if (start->is_border()) {
+        if (current->is_border()) {
             if (DEBUG_UTIL) {
                 cout << "Border edge:" << endl;
-                print_halfedge(start);
+                print_halfedge(current);
             }
             return true;
         }
         if (DEBUG_UTIL)
-            cout << "Normal: " << start->facet()->plane().orthogonal_vector() <<
+            cout << "Normal: " << current->facet()->plane().orthogonal_vector() <<
                 endl;
-        if (is_ridge(start))
+        if (is_ridge(current))
             ++count[0];
-        else if (is_channel(start))
+        else if (is_channel(current))
             ++count[1];
-        if (is_generalized_ridge(start))
+        if (is_generalized_ridge(current))
             ++count[0];
-        else if (is_generalized_channel(start))
+        else if (is_generalized_channel(current))
             ++count[1];
-    } while (++start != end);
+    } while (++current != end);
     assert(count[0] == count[1]);
     return (count[0] > 1 || count[1] > 1);
 }
 
 /**
- * Prints all points adjacent to the input vertex.
+ * Finds the halfedge whose left face has the steepest slope.
+ *
+ * The returned halfedge or its left face must have the steepest slope around v.
+ * This is exclusive of the next halfedge around the vertex.
  */
-void print_neighborhood(const Vertex& v)
+Halfedge_handle find_steepest_path(Vertex_handle v)
 {
-    cout << "Printing points around " << v.point() << endl;
-    typedef Vertex::Halfedge_around_vertex_const_circulator Circulator;
-    Circulator start = v.vertex_begin();
-    Circulator end = v.vertex_begin();
+    typedef Vertex::Halfedge_around_vertex_circulator Circulator;
+    Circulator current = v->vertex_begin();
+    Circulator end = v->vertex_begin();
+    Vector_3 steepest_vector = Vector_3(1, 0, 0);
+    Halfedge_handle steepest_halfedge = current;
     do {
-        cout << start->opposite()->vertex()->point() << endl;
-    } while (++start != end);
-    cout << endl;
+        Vector_3 normal;
+        // The steepest path must be an upslope ridge or a generalized ridge.
+        if (is_ridge(current) &&
+                current->opposite()->vertex()->point().z() > v->point().z())
+            normal = Vector_3(v->point(), current->opposite()->vertex()->point());
+        else if (is_generalized_ridge(current)) {
+            Vector_3 perp = current->facet()->plane().orthogonal_vector();
+            normal = Vector_3(perp.x(), perp.y(), 1 / perp.z());
+        }
+        else
+            continue;
+        if (is_steeper(normal, steepest_vector)) {
+            steepest_vector = normal;
+            steepest_halfedge = current;
+        }
+    } while (++current != end);
+    DEBUG_UTIL = true;
+    if (DEBUG_UTIL) {
+        print_neighborhood(*v);
+        cout << "Steepest vector: " << steepest_vector << endl;
+        cout << "Steepest halfedge: " << endl;
+        print_halfedge(steepest_halfedge);
+    }
+    DEBUG_UTIL = false;
+    return steepest_halfedge;
 }
 
-
 /**
- * Prints the two points of a halfedge.
+ * Returns the exit point of the upslope path beginning at h's vertex.
+ *
+ * Updates flag to reflect whether a new vertex must be added to the graph
+ * or if the exit point is at an existent vertex. Updates h so that it is the
+ * halfedge on which the exit point is located.
  */
-void print_halfedge(const Halfedge_const_handle& h)
+Point_3 find_upslope_intersection(Halfedge_handle& h, TraceFlag& flag)
 {
-    cout << h->opposite()->vertex()->point() << endl;
-    cout << h->vertex()->point() << endl;
+    Vector_3 normal_3 = h->facet()->plane().orthogonal_vector();
+    Vector_2 normal_2 = Vector_2(normal_3.x(), normal_3.y());
+    Line_2 upslope_path = Line_2(h->vertex()->point(), normal_2);
+    Point_2 start_point = Point_2(h->vertex->point().x(),
+            h->vertex->point().y());
+
+    Point_2 exit_2 = find_exit(h, upslope_path, start_point);
+    Point_3 exit_3 = h->facet()->plane().to_3d(exit_2);
+    if (exit_3 == h->vertex()->point())
+        flag = TRACE_POINT;
+    else
+        flag = TRACE_CONTINUE;
+    return exit_3;
 }

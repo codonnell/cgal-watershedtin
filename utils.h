@@ -3,10 +3,11 @@
 
 #include "definitions.h"
 
-/**
- * Set the label on all edges to be CHANNEL, RIDGE, or TRANSVERSE.
- */
-void label_all_edges(Polyhedron& p);
+enum TraceFlag {
+    TRACE_CONTINUE,
+    TRACE_POINT,
+    TRACE_FINISH
+};
 
 /**
  * Calculates the edge type of a halfedge that has not already been typed.
@@ -27,13 +28,20 @@ bool is_not_saddle(const Vertex& v);
 bool is_saddle(const Vertex_const_handle& v);
 
 /**
- * Prints all points adjacent to the input vertex.
+ * Finds the halfedge whose left face has the steepest slope.
+ *
+ * The returned halfedge or its left face must have the steepest slope around v.
+ * This is exclusive of the next halfedge around the vertex.
  */
-void print_neighborhood(const Vertex& v);
+Halfedge_handle find_steepest_path(Vertex_handle v);
 
 /**
- * Prints the two points of a halfedge.
+ * Returns the exit point of the upslope path beginning at h's vertex.
+ *
+ * Updates flag to reflect whether a new vertex must be added to the graph
+ * or if the exit point is at an existent vertex. Updates h so that it is the
+ * halfedge on which the exit point is located.
  */
-void print_halfedge(const Halfedge_const_handle& h);
+Point_3 find_upslope_intersection(Halfedge_handle& h, TraceFlag& flag);
 
 #endif

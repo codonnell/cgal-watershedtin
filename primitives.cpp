@@ -39,7 +39,7 @@ bool slopes_into(const Halfedge_const_handle& h)
     const Point_3 disp_point_3 = origin_3 + normal;
     const Point_2 disp_point_2 = Point_2(disp_point_3.x(), disp_point_3.y());
     
-    if (DEBUG_UTIL) {
+    if (DEBUG_PRIM) {
         cout << "Normal: " << normal << endl;
         cout << "Origin: " << origin_3 << endl;
         cout << "Dest: " << dest_3 << endl;
@@ -64,7 +64,7 @@ bool is_flat_plane(const Plane_3& h)
 bool is_ridge(const Halfedge_const_handle& h)
 {
     bool ret_val = !(slopes_into(h) || slopes_into(h->opposite()));
-    if (DEBUG_UTIL) {
+    if (DEBUG_PRIM) {
         cout << (ret_val ? "" : "Not ") << "Ridge:" << endl;
         print_halfedge(h);
     }
@@ -77,7 +77,7 @@ bool is_ridge(const Halfedge_const_handle& h)
 bool is_channel(const Halfedge_const_handle& h)
 {
     bool ret_val = slopes_into(h) && slopes_into(h->opposite());
-    if (DEBUG_UTIL) {
+    if (DEBUG_PRIM) {
         cout << (ret_val ? "" : "Not ") << "Channel:" << endl;
         print_halfedge(h);
     }
@@ -91,7 +91,7 @@ bool is_transverse(const Halfedge_const_handle& h)
 {
     bool ret_val = ((slopes_into(h) && !slopes_into(h->opposite())) ||
             (!slopes_into(h) && slopes_into(h->opposite())));
-    if (DEBUG_UTIL) {
+    if (DEBUG_PRIM) {
         cout << (ret_val ? "" : "Not ") << "Transverse:" << endl;
         print_halfedge(h);
     }
@@ -116,7 +116,7 @@ bool is_generalized_ridge(const Halfedge_const_handle& h)
     else {
        ret_val = (slopes_into(h) && slopes_into(h->next()));
     }
-    if (DEBUG_UTIL) {
+    if (DEBUG_PRIM) {
         cout << (ret_val ? "" : "Not ") << "Generalized Ridge:" << endl;
         print_halfedge(h);
         print_halfedge(h->next());
@@ -142,10 +142,65 @@ bool is_generalized_channel(const Halfedge_const_handle& h)
     else {
        ret_val = !(slopes_into(h) || slopes_into(h->next()));
     }
-    if (DEBUG_UTIL) {
+    if (DEBUG_PRIM) {
         cout << (ret_val ? "" : "Not ") << "Generalized Channel:" << endl;
         print_halfedge(h);
         print_halfedge(h->next());
     }
     return ret_val;
+}
+
+/**
+ * True if u is steeper than v. Uses the square of slope to avoid sqrt.
+ */
+bool is_steeper(Vector_3 u, Vector_3 v)
+{
+    Vector_2 u_2 = Vector_2(u.x(), u.y());
+    Vector_2 v_2 = Vector_2(v.x(), v.y());
+    return ((u.z() * u.z() / u_2.squared_length()) > 
+            (v.z() * v.z() / v_2.squared_length())); 
+}
+
+/**
+ * Finds the exit point of upslope_path on the facet left of h.
+ *
+ * upslope_path must intersect the boundary of the facet in 2 points or a
+ * segment. One of these points must be start_point. If the intersection is a
+ * segment, returns the endpoint that is not start_point. Otherwise returns the
+ * other intersection point.
+ */
+Point_2 find_exit(Halfedge_handle& h, Line_2 upslope_path, Point_2 start_point)
+{
+    Point_2 exit;
+    typedef Facet::Halfedge_around_facet_const_circulator Circulator;
+    Circulator current = h->facet()->facet_begin();
+    Circulator end = h->facet()->facet_begin();
+    do {
+    } while (++start != end);
+    return exit;
+}
+
+/**
+ * Prints all points adjacent to the input vertex.
+ */
+void print_neighborhood(const Vertex& v)
+{
+    cout << "Printing points around " << v.point() << endl;
+    typedef Vertex::Halfedge_around_vertex_const_circulator Circulator;
+    Circulator current = v.vertex_begin();
+    Circulator end = v.vertex_begin();
+    do {
+        cout << current->opposite()->vertex()->point() << endl;
+    } while (++current != end);
+    cout << endl;
+}
+
+
+/**
+ * Prints the two points of a halfedge.
+ */
+void print_halfedge(const Halfedge_const_handle& h)
+{
+    cout << h->opposite()->vertex()->point() << endl;
+    cout << h->vertex()->point() << endl;
 }

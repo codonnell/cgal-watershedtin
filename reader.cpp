@@ -19,7 +19,9 @@
 #include <cassert>
 
 #include "definitions.h"
+#include "primitives.h"
 #include "utils.h"
+#include "watershed.h"
 
 static bool DRAWING = false;
 static bool DEBUG_READER = false;
@@ -71,6 +73,8 @@ int main(int argc, char** argv)
         ofile << it->point() << endl;
     }
     ofile.close();
+
+    std::for_each(saddles.begin(), saddles.end(), trace_from_saddle);
 
     if (DRAWING) {
         Kernel::Iso_cuboid_3 c =

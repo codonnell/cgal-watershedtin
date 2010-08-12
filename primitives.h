@@ -64,4 +64,29 @@ bool is_generalized_ridge(const Halfedge_const_handle& h);
  */
 bool is_generalized_channel(const Halfedge_const_handle& h);
 
+/**
+ * True if u is steeper than v. Uses the square of slope to avoid sqrt.
+ */
+bool is_steeper(Vector_3 u, Vector_3 v);
+
+/**
+ * Prints all points adjacent to the input vertex.
+ */
+void print_neighborhood(const Vertex& v);
+
+/**
+ * Prints the two points of a halfedge.
+ */
+void print_halfedge(const Halfedge_const_handle& h);
+
+/**
+ * Finds the exit point of upslope_path on the facet left of h.
+ *
+ * upslope_path must intersect the boundary of the facet in 2 points or a
+ * segment. One of these points must be start_point. If the intersection is a
+ * segment, returns the endpoint that is not start_point. Otherwise returns the
+ * other intersection point.
+ */
+Point_2 find_exit(Halfedge_handle& h, Line_2 upslope_path, Point_2 start_point);
+
 #endif

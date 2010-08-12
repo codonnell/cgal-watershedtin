@@ -80,6 +80,7 @@ typedef Polyhedron::Plane_3 Plane_3;
 typedef Polyhedron::Point_3 Point_3;
 
 typedef Kernel::Vector_3 Vector_3;
+typedef Kernel::Vector_2 Vector_2;
 typedef Kernel::Point_2 Point_2;
 
 #endif
