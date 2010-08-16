@@ -118,9 +118,9 @@ Point_3 find_upslope_intersection(Halfedge_handle& h, TraceFlag& flag)
 {
     Vector_3 normal_3 = h->facet()->plane().orthogonal_vector();
     Vector_2 normal_2 = Vector_2(normal_3.x(), normal_3.y());
-    Line_2 upslope_path = Line_2(h->vertex()->point(), normal_2);
-    Point_2 start_point = Point_2(h->vertex->point().x(),
-            h->vertex->point().y());
+    Point_2 start_point = Point_2(h->vertex()->point().x(),
+            h->vertex()->point().y());
+    Ray_2 upslope_path = Ray_2(start_point, normal_2);
 
     Point_2 exit_2 = find_exit(h, upslope_path, start_point);
     Point_3 exit_3 = h->facet()->plane().to_3d(exit_2);
