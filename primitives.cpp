@@ -184,20 +184,19 @@ Point_2 find_exit(Halfedge_handle& h, Ray_2 upslope_path, Point_2 start_point)
         CGAL::Object intersect = CGAL::intersection(upslope_path, seg);
         // handle the point intersection case with *ipoint.
         if (const CGAL::Point_2<Kernel> *ipoint =
-                CGAL::object_cast<CGAL::Point_2<Kernel> >(&result)) {
-            
+                CGAL::object_cast<CGAL::Point_2<Kernel> >(&intersect)) {
+            if (*ipoint != start_point)
+                return *ipoint;
         } 
         // handle the segment intersection case with *iseg.
         else if (const CGAL::Segment_2<Kernel> *iseg =
-                CGAL::object_cast<CGAL::Segment_2<Kernel> >(&result)) {
-
-
+                CGAL::object_cast<CGAL::Segment_2<Kernel> >(&intersect)) {
+            if (iseg->source() == start_point)
+                return iseg->target();
+            return iseg->source();
         } 
-        // handle the no intersection case.
-        else {
-
-        }
     } while (++current != end);
+    std::abort();
     return exit;
 }
 

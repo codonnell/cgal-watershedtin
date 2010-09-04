@@ -117,7 +117,8 @@ Halfedge_handle find_steepest_path(Vertex_handle v)
 Point_3 find_upslope_intersection(Halfedge_handle& h, TraceFlag& flag)
 {
     Vector_3 normal_3 = h->facet()->plane().orthogonal_vector();
-    Vector_2 normal_2 = Vector_2(normal_3.x(), normal_3.y());
+    // We need the upslope, not downslope path, so we negate x and y vals.
+    Vector_2 normal_2 = Vector_2(-normal_3.x(), -normal_3.y());
     Point_2 start_point = Point_2(h->vertex()->point().x(),
             h->vertex()->point().y());
     Ray_2 upslope_path = Ray_2(start_point, normal_2);

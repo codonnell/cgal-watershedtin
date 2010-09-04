@@ -84,5 +84,6 @@ typedef Kernel::Vector_2 Vector_2;
 typedef Kernel::Point_2 Point_2;
 typedef Kernel::Line_2 Line_2;
 typedef Kernel::Ray_2 Ray_2;
+typedef Kernel::Segment_2 Segment_2;
 
 #endif
