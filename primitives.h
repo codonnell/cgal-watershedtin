@@ -89,4 +89,9 @@ void print_halfedge(const Halfedge_const_handle& h);
  */
 Point_2 find_exit(Halfedge_handle& h, Ray_2 upslope_path, Point_2 start_point);
 
+/**
+ * Prints the points around a facet.
+ */
+void print_facet(const Facet& f);
+
 #endif

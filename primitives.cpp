@@ -196,6 +196,9 @@ Point_2 find_exit(Halfedge_handle& h, Ray_2 upslope_path, Point_2 start_point)
             return iseg->source();
         } 
     } while (++current != end);
+    cout << "Start: " << start_point << endl;
+    cout << "Upslope path: " << upslope_path << endl;
+    print_facet(*h->facet());
     std::abort();
     return exit;
 }
@@ -215,7 +218,6 @@ void print_neighborhood(const Vertex& v)
     cout << endl;
 }
 
-
 /**
  * Prints the two points of a halfedge.
  */
@@ -223,4 +225,18 @@ void print_halfedge(const Halfedge_const_handle& h)
 {
     cout << h->opposite()->vertex()->point() << endl;
     cout << h->vertex()->point() << endl;
+}
+
+/**
+ * Prints the points around a facet.
+ */
+void print_facet(const Facet& f)
+{
+    typedef Vertex::Halfedge_around_facet_const_circulator Circulator;
+    Circulator current = f.facet_begin();
+    Circulator end = f.facet_begin();
+    do {
+        cout << current->vertex()->point() << endl;
+    } while (++current != end);
+    cout << endl;
 }
