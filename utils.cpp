@@ -51,8 +51,8 @@ bool is_saddle(const Vertex_const_handle& v)
             return true;
         }
         if (DEBUG_UTIL)
-            cout << "Normal: " << current->facet()->plane().orthogonal_vector() <<
-                endl;
+            cout << "Normal: " << current->facet()->plane().orthogonal_vector()
+                << endl;
         if (is_ridge(current))
             ++count[0];
         else if (is_channel(current))

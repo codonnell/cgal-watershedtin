@@ -13,7 +13,8 @@ using std::endl;
  */
 void label_all_edges(Polyhedron& p)
 {
-    for (Halfedge_iterator i = p.halfedges_begin(); i != p.halfedges_end(); ++i) {
+    for (Halfedge_iterator i = p.halfedges_begin(); i != p.halfedges_end(); ++i)
+    {
         // type is not initialized by the constructor, so we initialize it here.
         i->type = NO_TYPE;
         i->type = edge_type(i);
