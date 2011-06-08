@@ -34,6 +34,6 @@ void trace_up_once(Halfedge_handle& h, TraceFlag& flag);
  *
  * A traceup is finished when it reaches a saddle point, a ridge, or a border.
  */
-bool trace_finished(const Halfedge_const_handle& h, const TraceFlag& flag);
+bool trace_finished(const Halfedge_const_handle& h);
 
 #endif
