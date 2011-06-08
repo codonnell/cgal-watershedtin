@@ -167,13 +167,15 @@ bool is_steeper(Vector_3 u, Vector_3 v)
  * upslope_path must intersect the boundary of the facet in 2 points or a
  * segment. One of these points must be start_point. If the intersection is a
  * segment, returns the endpoint that is not start_point. Otherwise returns the
- * other intersection point.
+ * other intersection point. Updates h so it is the halfedge where the
+ * intersection is found.
  */
-Point_2 find_exit(Halfedge_handle& h, Ray_2 upslope_path, Point_2 start_point)
+Point_2 find_exit(Halfedge_handle& h, const Ray_2& upslope_path, 
+        const Point_2& start_point)
 {
     Point_2 exit;
     Plane_3 plane = h->facet()->plane();
-    typedef Facet::Halfedge_around_facet_const_circulator Circulator;
+    typedef Facet::Halfedge_around_facet_circulator Circulator;
     Circulator current = h->facet()->facet_begin();
     Circulator end = h->facet()->facet_begin();
 
@@ -181,21 +183,26 @@ Point_2 find_exit(Halfedge_handle& h, Ray_2 upslope_path, Point_2 start_point)
         Point_2 source = plane.to_2d(current->vertex()->point());
         Point_2 target = plane.to_2d(current->opposite()->vertex()->point());
         Segment_2 seg = Segment_2(source, target);
+        // Example pulled from http://tinyurl.com/intersect-doc
         CGAL::Object intersect = CGAL::intersection(upslope_path, seg);
-        // handle the point intersection case with *ipoint.
+        // Return for a point intersection
         if (const CGAL::Point_2<Kernel> *ipoint =
                 CGAL::object_cast<CGAL::Point_2<Kernel> >(&intersect)) {
-            if (*ipoint != start_point)
+            if (*ipoint != start_point) {
+                h = current;
                 return *ipoint;
+            }
         } 
-        // handle the segment intersection case with *iseg.
+        // Return the opposite point of the segment for a segment intersection.
         else if (const CGAL::Segment_2<Kernel> *iseg =
                 CGAL::object_cast<CGAL::Segment_2<Kernel> >(&intersect)) {
+            h = current;
             if (iseg->source() == start_point)
                 return iseg->target();
             return iseg->source();
         } 
     } while (++current != end);
+    cout << "Failed to find an intersection point." << endl;
     cout << "Start: " << start_point << endl;
     cout << "Upslope path: " << upslope_path << endl;
     print_facet(*h->facet());

@@ -87,7 +87,8 @@ void print_halfedge(const Halfedge_const_handle& h);
  * segment, returns the endpoint that is not start_point. Otherwise returns the
  * other intersection point.
  */
-Point_2 find_exit(Halfedge_handle& h, Ray_2 upslope_path, Point_2 start_point);
+Point_2 find_exit(Halfedge_handle& h, const Ray_2& upslope_path,
+        const Point_2& start_point);
 
 /**
  * Prints the points around a facet.
